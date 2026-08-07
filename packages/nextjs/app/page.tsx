@@ -1,15 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useAccount } from "wagmi";
 import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
-//import { Address } from "~~/components/scaffold-eth/Address";
 
 export default function Home() {
-  //const { address: connectedAddress } = useAccount();
-  //const { address } = useAccount();
-
   return (
     <div className="flex items-center flex-col flex-grow pt-10">
       <div className="px-5">
