@@ -13,6 +13,9 @@ contract CryptoHuertaToken is ERC20, Ownable {
     bytes32 public ultimoHash;
     uint256 public ultimaActualizacion;
 
+    // NUEVO: Array para historial de hashes
+    bytes32[] public historialHashes;
+
     uint256 public precioToken = 0.001 ether;
 
     event TokensComprados(address indexed comprador, uint256 cantidad, uint256 ethPagado);
@@ -35,10 +38,9 @@ contract CryptoHuertaToken is ERC20, Ownable {
         _mint(msg.sender, 10000 * 10 ** 18);
     }
 
-    //function comprarTokens() public payable {
     function buyTokens() public payable {
         require(msg.value > 0, "Debes enviar ETH");
-        uint256 tokens = msg.value / precioToken;
+        uint256 tokens = (msg.value * 10 ** 18) / precioToken;
         require(tokens > 0, "Monto insuficiente para comprar al menos 1 token");
         require(balanceOf(owner()) >= tokens, "No hay suficientes tokens en reserva");
         _transfer(owner(), msg.sender, tokens);
@@ -48,16 +50,18 @@ contract CryptoHuertaToken is ERC20, Ownable {
     function venderTokens(uint256 cantidad) external {
         require(cantidad > 0, "Cantidad debe ser mayor a 0");
         require(balanceOf(msg.sender) >= cantidad, "No tienes suficientes tokens");
-        uint256 ethDevuelto = cantidad * precioToken;
+        uint256 ethDevuelto = (cantidad * precioToken) / 10 ** 18;
         require(address(this).balance >= ethDevuelto, "El contrato no tiene suficiente ETH");
         _transfer(msg.sender, owner(), cantidad);
         payable(msg.sender).transfer(ethDevuelto);
         emit TokensVendidos(msg.sender, cantidad, ethDevuelto);
     }
 
+    // MODIFICADO: guarda en el historial
     function registrarInforme(bytes32 _hash) external onlyOwner {
         ultimoHash = _hash;
         ultimaActualizacion = block.timestamp;
+        historialHashes.push(_hash);
         emit InformeRegistrado(_hash, block.timestamp);
     }
 
@@ -72,11 +76,19 @@ contract CryptoHuertaToken is ERC20, Ownable {
     }
 
     function calcularTokens(uint256 ethAmount) external view returns (uint256) {
-        return ethAmount / precioToken;
+        return (ethAmount * 10 ** 18) / precioToken;
+    }
+
+    // NUEVAS: funciones para el historial
+    function obtenerHistorial() external view returns (bytes32[] memory) {
+        return historialHashes;
+    }
+
+    function cantidadInformes() external view returns (uint256) {
+        return historialHashes.length;
     }
 
     receive() external payable {
-       // comprarTokens();
         buyTokens();
     }
 }
