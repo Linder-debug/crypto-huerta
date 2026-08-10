@@ -10,17 +10,17 @@
 
 ---
 
-- [📌 Resumen del proyecto](#resumen-del-proyecto)
-- [🎯 Problema que resuelve](#problema-que-resuelve)
-- [🔧 Solución técnica](#solución-técnica)
-- [🏗️ Arquitectura del sistema](#arquitectura-del-sistema)
-- [🚀 Demo en vivo](#demo-en-vivo)
-- [📊 Modelo de negocio](#modelo-de-negocio)
-- [🛠️ Tecnologías utilizadas](#tecnologías-utilizadas)
-- [📦 Instalación y ejecución local](#instalación-y-ejecución-local)
-- [📜 Smart Contract](#smart-contract)
-- [👥 Equipo](#equipo)
-- [📄 Licencia](#licencia)
+- [📌 Resumen del proyecto](#-resumen-del-proyecto)
+- [🎯 Problema que resuelve](#-problema-que-resuelve)
+- [🔧 Solución técnica](#-solución-técnica)
+- [🏗️ Arquitectura del sistema](#️-arquitectura-del-sistema)
+- [🚀 Demo en vivo](#-demo-en-vivo)
+- [📊 Modelo de negocio](#-modelo-de-negocio)
+- [🛠️ Tecnologías utilizadas](#️-tecnologías-utilizadas)
+- [📦 Instalación y ejecución local](#-instalación-y-ejecución-local)
+- [📜 Smart Contract](#-smart-contract)
+- [👥 Equipo](#-equipo)
+- [📄 Licencia](#-licencia)
 
 ---
 
@@ -70,8 +70,8 @@ flowchart TD
     A[Usuario] -->|Interactúa vía| B[Frontend Next.js]
     B -->|Lee/Escribe| C[Smart Contract CryptoHuertaToken]
     C -->|Desplegado en| D[Arbitrum Sepolia]
-    B -->|Consulta| E[/api/resumen]
-    B -->|Consulta| E2[/api/noticias]
+    B -->|Consulta| E["/api/resumen"]
+    B -->|Consulta| E2["/api/noticias"]
     E -->|Llama a| F[OpenRouter]
     E2 -->|Llama a| F
     B -->|Tipo de cambio ETH/USD| M[CoinGecko / Binance]
@@ -100,10 +100,16 @@ flowchart TD
 
 ## 📊 Modelo de negocio
 
-- **Activo real:** lote de arándanos de exportación en Piura (Fundo Azul, 1000 m², 500 plantas premium, riego tecnificado).
+- **Activo real:** Fundo Azul, 80 hectáreas operativas, 812 lotes productivos, 500 plantas premium por lote (1000 m²), riego tecnificado por goteo y manejo agronómico profesional.
 - **Tokenización:** piloto demo con 2,500 CHT emitidos (5 lotes × 500 plantas).
-- **Rentabilidad de referencia (Fundo Azul):** Año 1 ~20% · Año 2 proyectado ~34%.
-- **Resultados reales campaña 2025-26:** 662,579 kg cosechados · 506,654 kg exportados · precio promedio 7.61 US$/kg · ventas totales US$ 4.29 M · margen operativo 27% (proyección 2026-27: 41%).
+- **Rentabilidad de referencia (Fundo Azul):** Año 1 ROI 8.85% · Año 2 proyectado ROI 34% · Margen operativo proyectado 41%.
+- **Resultados reales campaña 2025-26:**
+  - 662,579 kg cosechados
+  - 506,654 kg exportados (80% calidad exportación) + 131,761 kg mercado nacional
+  - Ventas totales: **US$ 4,293,179**
+  - Precio promedio FOB: **7.61 US$/kg**
+  - Distribución de exportaciones: Norteamérica 306,510 kg · Europa 161,264 kg · Asia 37,440 kg · Latam 1,440 kg
+- **Impacto social:** 556 colaboradores directos, 400 cosechadores en campaña, pico de 720 trabajadores.
 - **Ganan todos:** el inversor obtiene liquidez y transparencia; el operador, capital de escalamiento sin deuda bancaria; la comunidad, formalización y desarrollo regional.
 
 ---
