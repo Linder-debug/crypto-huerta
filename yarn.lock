@@ -4362,6 +4362,9 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": "npm:~6.0.2"
     "@types/node": "npm:~18.19.130"
     "@types/react": "npm:~19.2.14"
+    "@x402/core": "npm:^2.20.0"
+    "@x402/evm": "npm:^2.20.0"
+    "@x402/svm": "npm:^2.20.0"
     abitype: "npm:1.2.4"
     bgipfs: "npm:~0.0.18"
     blo: "npm:~2.0.0"
@@ -4494,12 +4497,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@solana-program/compute-budget@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "@solana-program/compute-budget@npm:0.11.0"
+  peerDependencies:
+    "@solana/kit": ^5.0
+  checksum: 10/7aabd69359df7da2633c9bee1aca9bced5c3df5d5126cb2a830fb285679f3269fe613f4664ccd3a2f37b3666e1f96cc887a594d75901ed5004c68c5f555224f8
+  languageName: node
+  linkType: hard
+
 "@solana-program/system@npm:^0.10.0":
   version: 0.10.0
   resolution: "@solana-program/system@npm:0.10.0"
   peerDependencies:
     "@solana/kit": ^5.0
   checksum: 10/f26304d3e7e178651b4d55f88261556f17720b82f70490fab7b6a575d4e34ded1744bf174e952b025d6e0b61e82b5496addd676eacebd37fc87cdf73ffc9a47b
+  languageName: node
+  linkType: hard
+
+"@solana-program/token-2022@npm:^0.6.1":
+  version: 0.6.1
+  resolution: "@solana-program/token-2022@npm:0.6.1"
+  peerDependencies:
+    "@solana/kit": ^5.0
+    "@solana/sysvars": ^5.0
+  checksum: 10/ed4c96a42b93351f4d50a04e14c1427ddf636d108ce9d4320d872530a8367a6acc36fca87ed5ccf029cdc57b67c6b75e5d7fc830b3a6e74dd4a994fda0820b0d
   languageName: node
   linkType: hard
 
@@ -6974,6 +6996,40 @@ __metadata:
     multiformats: "npm:^13.3.1"
     uint8arrays: "npm:^5.1.0"
   checksum: 10/9bf1b9b4e2e8535c69fbadbbbd23441b0ca09dd3330e1b8110d074520b9ac13741ab385b301241231286c52b2db4562d6c9e7a83b3418c5bd6e87c71e0981e05
+  languageName: node
+  linkType: hard
+
+"@x402/core@npm:^2.20.0, @x402/core@npm:~2.20.0":
+  version: 2.20.0
+  resolution: "@x402/core@npm:2.20.0"
+  dependencies:
+    zod: "npm:^3.24.2"
+  checksum: 10/44a9c1dff8a77df6faabcbc9612fcc8a6dd6d9340b377a9dabe633bcf2ee7a4114be9c77b249e838ee4d18acf30622dd746ec9b9a98b616d04ecc786c8d64ff0
+  languageName: node
+  linkType: hard
+
+"@x402/evm@npm:^2.20.0":
+  version: 2.20.0
+  resolution: "@x402/evm@npm:2.20.0"
+  dependencies:
+    "@x402/core": "npm:~2.20.0"
+    viem: "npm:^2.48.11"
+    zod: "npm:^3.24.2"
+  checksum: 10/05ca37d8274f931ebdbf9a927a666450e7ed9dc75276c067049cd81d677fa590e3308f2ea82438cfcb7c2dfe26750ec41bfc6a137d982a1a28c9733a472d3836
+  languageName: node
+  linkType: hard
+
+"@x402/svm@npm:^2.20.0":
+  version: 2.20.0
+  resolution: "@x402/svm@npm:2.20.0"
+  dependencies:
+    "@solana-program/compute-budget": "npm:^0.11.0"
+    "@solana-program/token": "npm:^0.9.0"
+    "@solana-program/token-2022": "npm:^0.6.1"
+    "@x402/core": "npm:~2.20.0"
+  peerDependencies:
+    "@solana/kit": ">=5.1.0"
+  checksum: 10/8e0505825312cbf599363fd56ba0fd6d8d37bc689e904e8077c470c7908cb5a1f5b1a4f5de08b9fa1b36bb09b546ae2b383131032651dd65c7af7390b59ccd39
   languageName: node
   linkType: hard
 
@@ -17897,7 +17953,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:>=2.29.0, viem@npm:^2.1.1, viem@npm:^2.23.12, viem@npm:^2.27.2, viem@npm:^2.31.7, viem@npm:^2.47.0, viem@npm:^2.48.2":
+"viem@npm:>=2.29.0, viem@npm:^2.1.1, viem@npm:^2.23.12, viem@npm:^2.27.2, viem@npm:^2.31.7, viem@npm:^2.47.0, viem@npm:^2.48.11, viem@npm:^2.48.2":
   version: 2.55.10
   resolution: "viem@npm:2.55.10"
   dependencies:
@@ -18492,7 +18548,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.22.4, zod@npm:^3.23.8, zod@npm:^3.25.76":
+"zod@npm:^3.22.4, zod@npm:^3.23.8, zod@npm:^3.24.2, zod@npm:^3.25.76":
   version: 3.25.76
   resolution: "zod@npm:3.25.76"
   checksum: 10/f0c963ec40cd96858451d1690404d603d36507c1fc9682f2dae59ab38b578687d542708a7fdbf645f77926f78c9ed558f57c3d3aa226c285f798df0c4da16995

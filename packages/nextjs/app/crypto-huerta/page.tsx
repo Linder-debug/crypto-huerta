@@ -5,6 +5,8 @@ import { toast } from "react-hot-toast";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useWatchBlockNumber } from "wagmi";
 import { useScaffoldReadContract, useScaffoldWriteContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { formatUsd, useEthUsdPrice } from "~~/hooks/useEthUsdPrice";
+import { useGasBuffer } from "~~/hooks/useGasBuffer";
 
 type IoTData = {
   temperatura: number;
@@ -17,7 +19,7 @@ export default function CryptoHuertaPage() {
   const { address, isConnected } = useAccount();
   const { targetNetwork } = useTargetNetwork();
   const [cantidadTokens, setCantidadTokens] = useState("");
-  const [ethAmount, setEthAmount] = useState("");
+  const [usdAmount, setUsdAmount] = useState("");
   const [isComprando, setIsComprando] = useState(false);
   const [isVendiendo, setIsVendiendo] = useState(false);
 
@@ -25,12 +27,15 @@ export default function CryptoHuertaPage() {
   const [cargandoIA, setCargandoIA] = useState(false);
 
   const [iotData, setIoTData] = useState<IoTData>({
-    temperatura: 0, //22 + Math.random() * 6,
-    humedad: 0, //55 + Math.random() * 20,
+    temperatura: 0,
+    humedad: 0,
     riego: "inactivo",
-    timestamp: 0, //Date.now(),
+    timestamp: 0,
   });
   const [historicoIoT, setHistoricoIoT] = useState<IoTData[]>([]);
+
+  const { ethUsd, isLive } = useEthUsdPrice();
+  const { getGasOverrides } = useGasBuffer();
 
   // ---- LECTURAS ----
   const { data: balance, refetch: refetchBalance } = useScaffoldReadContract({
@@ -59,7 +64,6 @@ export default function CryptoHuertaPage() {
     functionName: "cultivo",
   });
 
-  // NUEVO: leer historial
   const { data: historial } = useScaffoldReadContract({
     contractName: "CryptoHuertaToken",
     functionName: "obtenerHistorial",
@@ -76,19 +80,37 @@ export default function CryptoHuertaPage() {
     contractName: "CryptoHuertaToken",
   });
 
+  // ---- DERIVADOS PRICING USDC ----
+  const precioEth = precio !== undefined ? Number(formatEther(precio)) : null;
+  const precioUsd = precioEth !== null && ethUsd ? precioEth * ethUsd : null;
+
+  const usdNum = parseFloat(usdAmount);
+  const ethEquivalente = !isNaN(usdNum) && usdNum > 0 && ethUsd ? usdNum / ethUsd : null;
+  const tokensEstimados = ethEquivalente !== null && precioEth ? ethEquivalente / precioEth : null;
+
+  const tokensAVender = parseFloat(cantidadTokens);
+  const ethVenta = !isNaN(tokensAVender) && tokensAVender > 0 && precioEth ? tokensAVender * precioEth : null;
+  const usdVenta = ethVenta !== null && ethUsd ? ethVenta * ethUsd : null;
+
   const handleComprar = async () => {
-    if (!ethAmount || parseFloat(ethAmount) <= 0) {
-      toast.error("Ingresa un monto en ETH válido");
+    if (!usdAmount || isNaN(usdNum) || usdNum <= 0) {
+      toast.error("Ingresa un monto válido en USDC");
+      return;
+    }
+    if (!ethUsd) {
+      toast.error("Esperando el tipo de cambio ETH/USD...");
       return;
     }
     try {
       setIsComprando(true);
+      const gas = await getGasOverrides();
       await writeCryptoHuertaAsync({
         functionName: "buyTokens",
-        value: parseEther(ethAmount),
+        value: parseEther((usdNum / ethUsd).toFixed(9)),
+        ...gas,
       });
       toast.success("✅ Tokens comprados!");
-      setEthAmount("");
+      setUsdAmount("");
       await refetchBalance();
     } catch (e) {
       console.error(e);
@@ -99,15 +121,17 @@ export default function CryptoHuertaPage() {
   };
 
   const handleVender = async () => {
-    if (!cantidadTokens || parseFloat(cantidadTokens) <= 0) {
+    if (!cantidadTokens || isNaN(tokensAVender) || tokensAVender <= 0) {
       toast.error("Ingresa una cantidad válida de tokens");
       return;
     }
     try {
       setIsVendiendo(true);
+      const gas = await getGasOverrides();
       await writeCryptoHuertaAsync({
         functionName: "venderTokens",
         args: [parseEther(cantidadTokens)],
+        ...gas,
       });
       toast.success("✅ Tokens vendidos!");
       setCantidadTokens("");
@@ -157,12 +181,9 @@ export default function CryptoHuertaPage() {
       };
     };
 
-    // ✅ Primer dato inmediato
     const primerDato = generarDatos();
     setIoTData(primerDato);
     setHistoricoIoT([primerDato]);
-
-    // Intervalo cada 5 segundos
 
     const intervalo = setInterval(() => {
       const nuevoDato = generarDatos();
@@ -210,7 +231,18 @@ export default function CryptoHuertaPage() {
         </p>
         <p>
           <span className="font-medium">Precio actual (1 CHT):</span>{" "}
-          {precio !== undefined ? formatEther(precio) : "..."} ETH
+          {precioUsd !== null ? (
+            <>
+              <span className="font-bold text-success">{formatUsd(precioUsd)} USDC</span>{" "}
+              <span className="text-xs text-gray-500">({precio !== undefined ? formatEther(precio) : "..."} ETH)</span>
+            </>
+          ) : (
+            "..."
+          )}
+        </p>
+        <p className="text-xs text-gray-500 mt-1">
+          Tipo de cambio ETH/USD: {ethUsd ? formatUsd(ethUsd) : "cargando..."}
+          {ethUsd && !isLive && " (referencial, sin conexión a APIs)"}
         </p>
       </div>
 
@@ -218,6 +250,9 @@ export default function CryptoHuertaPage() {
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-2">Tu balance</h2>
         <p className="text-2xl font-bold">{balance !== undefined ? formatEther(balance) : "0"} CHT</p>
+        {balance !== undefined && precioUsd !== null && (
+          <p className="text-sm text-gray-500">≈ {formatUsd(Number(formatEther(balance)) * precioUsd)} USDC</p>
+        )}
       </div>
 
       {/* Hash actual */}
@@ -226,7 +261,7 @@ export default function CryptoHuertaPage() {
         <p className="text-sm font-mono break-all">{ultimoHash || "No hay informes aún"}</p>
       </div>
 
-      {/* NUEVO: Historial de informes */}
+      {/* Historial de informes */}
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-2">📋 Historial de informes</h2>
         {historial && historial.length > 0 ? (
@@ -242,7 +277,7 @@ export default function CryptoHuertaPage() {
         )}
       </div>
 
-      {/* NUEVO: Gráfico de rendimiento */}
+      {/* Gráfico de rendimiento */}
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-2">📊 Rendimiento esperado vs. real</h2>
         <p className="text-sm text-gray-500 mb-4">
@@ -316,23 +351,33 @@ export default function CryptoHuertaPage() {
         </div>
       </div>
 
-      {/* Comprar / Vender */}
+      {/* Comprar */}
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-2">Comprar CHT</h2>
         <div className="flex flex-col gap-2">
           <input
             type="number"
-            placeholder="Cantidad de ETH a invertir"
+            placeholder="Monto a invertir en USDC (ej. 5)"
             className="input input-bordered w-full"
-            value={ethAmount}
-            onChange={e => setEthAmount(e.target.value)}
+            value={usdAmount}
+            onChange={e => setUsdAmount(e.target.value)}
           />
+          {ethEquivalente !== null && (
+            <p className="text-sm text-gray-500">
+              ≈ {ethEquivalente.toFixed(6)} ETH · Recibirás ≈{" "}
+              {tokensEstimados !== null ? tokensEstimados.toFixed(2) : "0"} CHT
+            </p>
+          )}
           <button className="btn btn-primary" onClick={handleComprar} disabled={isComprando}>
             {isComprando ? "Procesando..." : "Comprar tokens"}
           </button>
         </div>
+        <p className="text-xs text-gray-500 mt-2">
+          El pago se ejecuta en ETH de Arbitrum Sepolia, al equivalente en USDC del momento.
+        </p>
       </div>
 
+      {/* Vender */}
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-2">Vender CHT</h2>
         <div className="flex flex-col gap-2">
@@ -343,6 +388,11 @@ export default function CryptoHuertaPage() {
             value={cantidadTokens}
             onChange={e => setCantidadTokens(e.target.value)}
           />
+          {ethVenta !== null && (
+            <p className="text-sm text-gray-500">
+              Recibirás ≈ {ethVenta.toFixed(6)} ETH (≈ {formatUsd(usdVenta)} USDC)
+            </p>
+          )}
           <button className="btn btn-secondary" onClick={handleVender} disabled={isVendiendo}>
             {isVendiendo ? "Procesando..." : "Vender tokens"}
           </button>

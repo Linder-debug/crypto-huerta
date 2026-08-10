@@ -5,19 +5,22 @@ import { toast } from "react-hot-toast";
 import { parseEther } from "viem";
 import { useAccount } from "wagmi";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { formatUsd, useEthUsdPrice } from "~~/hooks/useEthUsdPrice";
+import { useGasBuffer } from "~~/hooks/useGasBuffer";
 
 export default function AdminPage() {
   const { address, isConnected } = useAccount();
-  const [nuevoPrecio, setNuevoPrecio] = useState("");
+  const [nuevoPrecioUsd, setNuevoPrecioUsd] = useState("");
   const [archivo, setArchivo] = useState<File | null>(null);
 
-  // Leer el owner real del contrato (NO hardcodeado)
+  const { ethUsd, isLive } = useEthUsdPrice();
+  const { getGasOverrides } = useGasBuffer();
+
   const { data: owner } = useScaffoldReadContract({
     contractName: "CryptoHuertaToken",
     functionName: "owner",
   });
 
-  // Leer el historial
   const { data: historial } = useScaffoldReadContract({
     contractName: "CryptoHuertaToken",
     functionName: "obtenerHistorial",
@@ -27,8 +30,10 @@ export default function AdminPage() {
     contractName: "CryptoHuertaToken",
   });
 
-  // Verificar si la wallet conectada es el owner
   const isOwner = owner?.toLowerCase() === address?.toLowerCase();
+
+  const usdNum = parseFloat(nuevoPrecioUsd);
+  const ethEquivalentePrecio = !isNaN(usdNum) && usdNum > 0 && ethUsd ? usdNum / ethUsd : null;
 
   const calcularHash = async (file: File): Promise<string> => {
     const buffer = await file.arrayBuffer();
@@ -44,9 +49,11 @@ export default function AdminPage() {
     }
     try {
       const hash = await calcularHash(archivo);
+      const gas = await getGasOverrides();
       await writeContractAsync({
         functionName: "registrarInforme",
         args: [hash as `0x${string}`],
+        ...gas,
       });
       toast.success("✅ Informe registrado en blockchain");
       setArchivo(null);
@@ -59,17 +66,23 @@ export default function AdminPage() {
   };
 
   const handleActualizarPrecio = async () => {
-    if (!nuevoPrecio || parseFloat(nuevoPrecio) <= 0) {
-      toast.error("Ingresa un precio válido en ETH");
+    if (!nuevoPrecioUsd || isNaN(usdNum) || usdNum <= 0) {
+      toast.error("Ingresa un precio válido en USDC");
+      return;
+    }
+    if (!ethUsd) {
+      toast.error("Esperando el tipo de cambio ETH/USD...");
       return;
     }
     try {
+      const gas = await getGasOverrides();
       await writeContractAsync({
         functionName: "actualizarPrecio",
-        args: [parseEther(nuevoPrecio)],
+        args: [parseEther((usdNum / ethUsd).toFixed(9))],
+        ...gas,
       });
       toast.success("✅ Precio actualizado");
-      setNuevoPrecio("");
+      setNuevoPrecioUsd("");
     } catch (e) {
       console.error(e);
       toast.error("❌ Error al actualizar precio");
@@ -121,15 +134,22 @@ export default function AdminPage() {
         <div className="flex flex-col gap-2">
           <input
             type="number"
-            placeholder="Nuevo precio en ETH (ej. 0.002)"
+            placeholder="Nuevo precio en USDC (ej. 0.0032)"
             className="input input-bordered w-full"
-            value={nuevoPrecio}
-            onChange={e => setNuevoPrecio(e.target.value)}
+            value={nuevoPrecioUsd}
+            onChange={e => setNuevoPrecioUsd(e.target.value)}
           />
+          {ethEquivalentePrecio !== null && (
+            <p className="text-sm text-gray-500">≈ {ethEquivalentePrecio.toFixed(9)} ETH en el contrato</p>
+          )}
           <button className="btn btn-secondary" onClick={handleActualizarPrecio}>
             Actualizar precio
           </button>
         </div>
+        <p className="text-xs text-gray-500 mt-2">
+          Tipo de cambio ETH/USD: {ethUsd ? formatUsd(ethUsd) : "cargando..."}
+          {ethUsd && !isLive && " (referencial, sin conexión a APIs)"}
+        </p>
       </div>
 
       {/* Historial de informes */}
