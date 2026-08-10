@@ -1,6 +1,6 @@
 "use client";
 
-// ---------- Datos reales campaña 2025-26 (Fuente: Resultados Fundo Azul) ----------
+// ---------- DATOS REALES CAMPAÑA 2025-26 (Fuente: Resultados Fundo Azul · Agroextiende) ----------
 const PRECIO_FOB = [
   { mes: "Ago", precio: 11.07 },
   { mes: "Set", precio: 10.85 },
@@ -12,11 +12,11 @@ const PRECIO_FOB = [
   { mes: "Mar", precio: 8.62 },
 ];
 
-// Pronóstico referencial: estabilidad al precio de cierre de campaña
+// Pronóstico referencial: recuperación hacia ~US$10 (presentación Fundo Azul)
 const PRONOSTICO = [
-  { mes: "Abr", precio: 8.62 },
-  { mes: "May", precio: 8.62 },
-  { mes: "Jun", precio: 8.62 },
+  { mes: "Abr", precio: 9.2 },
+  { mes: "May", precio: 9.6 },
+  { mes: "Jun", precio: 10.0 },
 ];
 
 const KILOS_DESTINO = [
@@ -26,11 +26,22 @@ const KILOS_DESTINO = [
   { destino: "Norteam.", kilos: 306510 },
 ];
 
-type DatoRendimiento = { mes: string; esperado: number; real: number };
+// Producción real mensual (kg) y programado proporcional = real × 1.2
+// (objetivo ~2.0 kg/planta vs rendimiento real 1.65 kg/planta, según informe)
+export const RENDIMIENTO = [
+  { mes: "Ago", programado: 45214, real: 37678 },
+  { mes: "Set", programado: 58445, real: 48704 },
+  { mes: "Oct", programado: 43535, real: 36279 },
+  { mes: "Nov", programado: 115651, real: 96376 },
+  { mes: "Dic", programado: 160836, real: 134030 },
+  { mes: "Ene", programado: 180023, real: 150019 },
+  { mes: "Feb", programado: 119814, real: 99845 },
+  { mes: "Mar", programado: 62333, real: 51944 },
+];
 
 /** Barras agrupadas: programado (violeta) vs real (verde) */
-export function GraficoRendimiento({ datos }: { datos: DatoRendimiento[] }) {
-  const max = Math.max(...datos.map(d => Math.max(d.esperado, d.real)));
+export function GraficoRendimiento() {
+  const max = Math.max(...RENDIMIENTO.map(d => Math.max(d.programado, d.real)));
   return (
     <div>
       <div className="flex items-center gap-4 mb-3 text-xs">
@@ -41,15 +52,18 @@ export function GraficoRendimiento({ datos }: { datos: DatoRendimiento[] }) {
           <span className="w-3 h-3 rounded bg-lime-500 inline-block" /> Real
         </span>
       </div>
-      <div className="flex items-end gap-2 sm:gap-4 h-40">
-        {datos.map(d => (
+      <div className="flex items-end gap-1 sm:gap-4 h-40">
+        {RENDIMIENTO.map(d => (
           <div key={d.mes} className="flex-1 flex flex-col items-center justify-end h-full">
             <div
-              className="flex items-end gap-1 w-full justify-center h-full"
-              title={`${d.mes}: programado ${d.esperado} kg / real ${d.real} kg`}
+              className="flex items-end gap-0.5 sm:gap-1 w-full justify-center h-full"
+              title={`${d.mes}: programado ${d.programado.toLocaleString("en-US")} kg / real ${d.real.toLocaleString("en-US")} kg`}
             >
-              <div className="w-3 sm:w-5 bg-violet-500 rounded-t" style={{ height: `${(d.esperado / max) * 100}%` }} />
-              <div className="w-3 sm:w-5 bg-lime-500 rounded-t" style={{ height: `${(d.real / max) * 100}%` }} />
+              <div
+                className="w-2 sm:w-5 bg-violet-500 rounded-t"
+                style={{ height: `${(d.programado / max) * 100}%` }}
+              />
+              <div className="w-2 sm:w-5 bg-lime-500 rounded-t" style={{ height: `${(d.real / max) * 100}%` }} />
             </div>
             <span className="text-[10px] text-gray-400 mt-1">{d.mes}</span>
           </div>

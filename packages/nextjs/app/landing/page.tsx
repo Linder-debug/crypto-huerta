@@ -102,7 +102,7 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
-        <p className="text-center text-sm sm:text-lg mt-6 sm:mt-8 italic text-gray-600 px-2">
+        <p className="text-center text-sm sm:text-lg mt-6 sm:mt-8 italic text-gray-500  px-2">
           {"“Pagué S/53,800 por un lote real. No podía verificar mis propias plantas entre informe e informe.”"}
         </p>
       </section>

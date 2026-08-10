@@ -4,7 +4,12 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useWatchBlockNumber } from "wagmi";
-import { GraficoKilosDestino, GraficoPrecioFOB, GraficoRendimiento } from "~~/components/GraficosFundoAzul";
+import {
+  GraficoKilosDestino,
+  GraficoPrecioFOB,
+  GraficoRendimiento,
+  RENDIMIENTO,
+} from "~~/components/GraficosFundoAzul";
 import { useScaffoldReadContract, useScaffoldWriteContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { formatUsd, useEthUsdPrice } from "~~/hooks/useEthUsdPrice";
 import { useGasBuffer } from "~~/hooks/useGasBuffer";
@@ -201,16 +206,6 @@ export default function CryptoHuertaPage() {
     return () => clearInterval(intervalo);
   }, []);
 
-  // Datos para el gráfico de rendimiento
-  const datosRendimiento = [
-    { mes: "Ene", esperado: 80, real: 75 },
-    { mes: "Feb", esperado: 120, real: 110 },
-    { mes: "Mar", esperado: 150, real: 140 },
-    { mes: "Abr", esperado: 200, real: 180 },
-    { mes: "May", esperado: 180, real: 190 },
-    { mes: "Jun", esperado: 150, real: 160 },
-  ];
-
   if (!isConnected) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -225,8 +220,13 @@ export default function CryptoHuertaPage() {
 
       {/* Información del lote */}
 
-      <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch md:items-center">
+      <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6 relative overflow-hidden">
+        {/* Fondo solo en móvil */}
+        <div
+          className="absolute inset-0 md:hidden bg-cover bg-center opacity-20"
+          style={{ backgroundImage: "url('/img/arandanos.jpg')" }}
+        />
+        <div className="relative flex flex-col md:flex-row gap-4 md:gap-6 items-stretch md:items-center">
           <div className="flex-1 w-full">
             <h2 className="text-xl font-semibold mb-2">Información del lote</h2>
             <p>
@@ -253,13 +253,14 @@ export default function CryptoHuertaPage() {
               {ethUsd && !isLive && " (referencial, sin conexión a APIs)"}
             </p>
           </div>
-          <div className="w-full md:w-64 shrink-0 mt-2 md:mt-0">
+          {/* Imagen al costado solo en laptop */}
+          <div className="hidden md:block w-64 shrink-0">
             <Image
               src="/img/arandanos.jpg"
               width={256}
               height={192}
               alt="Arándanos premium del lote"
-              className="rounded-lg w-full h-40 md:h-64 object-cover shadow"
+              className="rounded-lg w-full h-64 object-cover shadow"
             />
             <p className="text-xs text-gray-500 mt-1 text-center">Arándanos premium, Piura</p>
           </div>
@@ -299,10 +300,13 @@ export default function CryptoHuertaPage() {
 
       {/* Gráfico de rendimiento */}
       {/* Rendimiento del lote */}
+
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
         <h2 className="text-xl font-semibold mb-2">📊 Rendimiento del lote: programado vs real</h2>
-        <p className="text-sm text-gray-500 mb-4">Kilogramos por mes comparados con la proyección del lote.</p>
-        <GraficoRendimiento datos={datosRendimiento} />
+        <p className="text-sm text-gray-500 mb-4">
+          Kilogramos por mes de la campaña 2025-26: cosecha real vs proyección proporcional.
+        </p>
+        <GraficoRendimiento />
         <button className="btn btn-ghost btn-sm mt-4" onClick={() => setMostrarTabla(v => !v)}>
           {mostrarTabla ? "▲ Ocultar tabla detallada" : "▼ Ver tabla detallada"}
         </button>
@@ -312,28 +316,28 @@ export default function CryptoHuertaPage() {
               <thead>
                 <tr>
                   <th>Mes</th>
-                  <th>Esperado (kg)</th>
+                  <th>Programado (kg)</th>
                   <th>Real (kg)</th>
-                  <th>Diferencia</th>
+                  <th>Cumplimiento</th>
                 </tr>
               </thead>
               <tbody>
-                {datosRendimiento.map(dato => (
-                  <tr key={dato.mes}>
-                    <td>{dato.mes}</td>
-                    <td>{dato.esperado}</td>
-                    <td>{dato.real}</td>
-                    <td className={dato.real >= dato.esperado ? "text-success" : "text-error"}>
-                      {dato.real >= dato.esperado ? "+" : ""}
-                      {dato.real - dato.esperado}
-                    </td>
+                {RENDIMIENTO.map(d => (
+                  <tr key={d.mes}>
+                    <td>{d.mes}</td>
+                    <td>{d.programado.toLocaleString("en-US")}</td>
+                    <td>{d.real.toLocaleString("en-US")}</td>
+                    <td className="text-warning">{Math.round((d.real / d.programado) * 100)}%</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
-        <div className="mt-2 text-xs text-gray-500">* Datos simulados basados en proyecciones de Fundo Azul.</div>
+        <div className="mt-2 text-xs text-gray-500">
+          * Real: cosecha campaña 2025-26 (Fundo Azul). Programado: estimación proporcional (×1.2, objetivo ~2.0
+          kg/planta).
+        </div>
       </div>
 
       {/* Mercado del arándano */}
