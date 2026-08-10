@@ -4,6 +4,7 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useWatchBlockNumber } from "wagmi";
+import { GraficoKilosDestino, GraficoPrecioFOB, GraficoRendimiento } from "~~/components/GraficosFundoAzul";
 import { useScaffoldReadContract, useScaffoldWriteContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { formatUsd, useEthUsdPrice } from "~~/hooks/useEthUsdPrice";
 import { useGasBuffer } from "~~/hooks/useGasBuffer";
@@ -25,6 +26,8 @@ export default function CryptoHuertaPage() {
 
   const [resumenIA, setResumenIA] = useState("");
   const [cargandoIA, setCargandoIA] = useState(false);
+
+  const [mostrarTabla, setMostrarTabla] = useState(false);
 
   const [iotData, setIoTData] = useState<IoTData>({
     temperatura: 0,
@@ -221,9 +224,9 @@ export default function CryptoHuertaPage() {
       <h1 className="text-3xl font-bold mb-6">🌱 CryptoHuerta - Tu inversión en arándanos</h1>
 
       {/* Información del lote */}
-      {/* Información del lote */}
+
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
-        <div className="flex flex-col md:flex-row gap-6 items-center">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6 items-stretch md:items-center">
           <div className="flex-1 w-full">
             <h2 className="text-xl font-semibold mb-2">Información del lote</h2>
             <p>
@@ -250,13 +253,13 @@ export default function CryptoHuertaPage() {
               {ethUsd && !isLive && " (referencial, sin conexión a APIs)"}
             </p>
           </div>
-          <div className="w-full md:w-64 shrink-0">
+          <div className="w-full md:w-64 shrink-0 mt-2 md:mt-0">
             <Image
               src="/img/arandanos.jpg"
               width={256}
               height={192}
               alt="Arándanos premium del lote"
-              className="rounded-lg w-full h-48 md:h-64 object-cover shadow"
+              className="rounded-lg w-full h-40 md:h-64 object-cover shadow"
             />
             <p className="text-xs text-gray-500 mt-1 text-center">Arándanos premium, Piura</p>
           </div>
@@ -295,37 +298,69 @@ export default function CryptoHuertaPage() {
       </div>
 
       {/* Gráfico de rendimiento */}
+      {/* Rendimiento del lote */}
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-2">📊 Rendimiento esperado vs. real</h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Comparativa entre la producción esperada (proyección) y la producción real estimada (kg).
-        </p>
-        <div className="overflow-x-auto">
-          <table className="table table-sm">
-            <thead>
-              <tr>
-                <th>Mes</th>
-                <th>Esperado (kg)</th>
-                <th>Real (kg)</th>
-                <th>Diferencia</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datosRendimiento.map(dato => (
-                <tr key={dato.mes}>
-                  <td>{dato.mes}</td>
-                  <td>{dato.esperado}</td>
-                  <td>{dato.real}</td>
-                  <td className={dato.real >= dato.esperado ? "text-success" : "text-error"}>
-                    {dato.real >= dato.esperado ? "+" : ""}
-                    {dato.real - dato.esperado}
-                  </td>
+        <h2 className="text-xl font-semibold mb-2">📊 Rendimiento del lote: programado vs real</h2>
+        <p className="text-sm text-gray-500 mb-4">Kilogramos por mes comparados con la proyección del lote.</p>
+        <GraficoRendimiento datos={datosRendimiento} />
+        <button className="btn btn-ghost btn-sm mt-4" onClick={() => setMostrarTabla(v => !v)}>
+          {mostrarTabla ? "▲ Ocultar tabla detallada" : "▼ Ver tabla detallada"}
+        </button>
+        {mostrarTabla && (
+          <div className="overflow-x-auto mt-3">
+            <table className="table table-sm">
+              <thead>
+                <tr>
+                  <th>Mes</th>
+                  <th>Esperado (kg)</th>
+                  <th>Real (kg)</th>
+                  <th>Diferencia</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {datosRendimiento.map(dato => (
+                  <tr key={dato.mes}>
+                    <td>{dato.mes}</td>
+                    <td>{dato.esperado}</td>
+                    <td>{dato.real}</td>
+                    <td className={dato.real >= dato.esperado ? "text-success" : "text-error"}>
+                      {dato.real >= dato.esperado ? "+" : ""}
+                      {dato.real - dato.esperado}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
         <div className="mt-2 text-xs text-gray-500">* Datos simulados basados en proyecciones de Fundo Azul.</div>
+      </div>
+
+      {/* Mercado del arándano */}
+      <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-2">🫐 Mercado del arándano · Campaña 2025-26</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Comportamiento real de ventas: precio promedio FOB y kilos exportados por destino.
+        </p>
+        <div className="mb-6">
+          <h3 className="text-sm font-medium mb-2">Precio promedio FOB (US$/kg)</h3>
+          <GraficoPrecioFOB />
+          <div className="flex flex-wrap items-center gap-4 mt-2 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-1.5 bg-lime-400 inline-block rounded" /> Real campaña 25-26
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-3 h-1.5 bg-gray-400 inline-block rounded" /> Pronóstico referencial
+            </span>
+          </div>
+        </div>
+        <div>
+          <h3 className="text-sm font-medium mb-2">Kilos exportados por destino</h3>
+          <GraficoKilosDestino />
+        </div>
+        <div className="mt-3 text-xs text-gray-500">
+          Fuente: Resultados campaña 2025-26 · Fundo Azul (Agroextiende).
+        </div>
       </div>
 
       {/* IoT */}
