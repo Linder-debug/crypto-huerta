@@ -1,6 +1,6 @@
 "use client";
-
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useWatchBlockNumber } from "wagmi";
@@ -221,29 +221,46 @@ export default function CryptoHuertaPage() {
       <h1 className="text-3xl font-bold mb-6">🌱 CryptoHuerta - Tu inversión en arándanos</h1>
 
       {/* Información del lote */}
+      {/* Información del lote */}
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-2">Información del lote</h2>
-        <p>
-          <span className="font-medium">Ubicación:</span> {ubicacion || "Cargando..."}
-        </p>
-        <p>
-          <span className="font-medium">Cultivo:</span> {cultivo || "Cargando..."}
-        </p>
-        <p>
-          <span className="font-medium">Precio actual (1 CHT):</span>{" "}
-          {precioUsd !== null ? (
-            <>
-              <span className="font-bold text-success">{formatUsd(precioUsd)} USDC</span>{" "}
-              <span className="text-xs text-gray-500">({precio !== undefined ? formatEther(precio) : "..."} ETH)</span>
-            </>
-          ) : (
-            "..."
-          )}
-        </p>
-        <p className="text-xs text-gray-500 mt-1">
-          Tipo de cambio ETH/USD: {ethUsd ? formatUsd(ethUsd) : "cargando..."}
-          {ethUsd && !isLive && " (referencial, sin conexión a APIs)"}
-        </p>
+        <div className="flex flex-col md:flex-row gap-6 items-center">
+          <div className="flex-1 w-full">
+            <h2 className="text-xl font-semibold mb-2">Información del lote</h2>
+            <p>
+              <span className="font-medium">Ubicación:</span> {ubicacion || "Cargando..."}
+            </p>
+            <p>
+              <span className="font-medium">Cultivo:</span> {cultivo || "Cargando..."}
+            </p>
+            <p>
+              <span className="font-medium">Precio actual (1 CHT):</span>{" "}
+              {precioUsd !== null ? (
+                <>
+                  <span className="font-bold text-success">{formatUsd(precioUsd)} USDC</span>{" "}
+                  <span className="text-xs text-gray-500">
+                    ({precio !== undefined ? formatEther(precio) : "..."} ETH)
+                  </span>
+                </>
+              ) : (
+                "..."
+              )}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Tipo de cambio ETH/USD: {ethUsd ? formatUsd(ethUsd) : "cargando..."}
+              {ethUsd && !isLive && " (referencial, sin conexión a APIs)"}
+            </p>
+          </div>
+          <div className="w-full md:w-64 shrink-0">
+            <Image
+              src="/img/arandanos.jpg"
+              width={256}
+              height={192}
+              alt="Arándanos premium del lote"
+              className="rounded-lg w-full h-48 md:h-64 object-cover shadow"
+            />
+            <p className="text-xs text-gray-500 mt-1 text-center">Arándanos premium, Piura</p>
+          </div>
+        </div>
       </div>
 
       {/* Balance */}
@@ -317,18 +334,20 @@ export default function CryptoHuertaPage() {
         <p className="text-sm text-gray-500 mb-4">
           Datos simulados de sensores en tiempo real (actualización cada 5 segundos).
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="bg-base-200 p-4 rounded-lg text-center">
-            <p className="text-sm text-gray-500">🌡️ Temperatura</p>
-            <p className="text-2xl font-bold">{iotData.temperatura} °C</p>
+        <div className="grid grid-cols-3 gap-2 md:gap-4 mb-4">
+          <div className="bg-base-200 p-2 md:p-4 rounded-lg text-center">
+            <p className="text-xs md:text-sm text-gray-500">🌡️ Temperatura</p>
+            <p className="text-lg md:text-2xl font-bold">{iotData.temperatura} °C</p>
           </div>
-          <div className="bg-base-200 p-4 rounded-lg text-center">
-            <p className="text-sm text-gray-500">💧 Humedad del suelo</p>
-            <p className="text-2xl font-bold">{iotData.humedad} %</p>
+          <div className="bg-base-200 p-2 md:p-4 rounded-lg text-center">
+            <p className="text-xs md:text-sm text-gray-500">💧 Humedad del suelo</p>
+            <p className="text-lg md:text-2xl font-bold">{iotData.humedad} %</p>
           </div>
-          <div className="bg-base-200 p-4 rounded-lg text-center">
-            <p className="text-sm text-gray-500">💦 Riego</p>
-            <p className={`text-2xl font-bold ${iotData.riego === "activo" ? "text-success" : "text-gray-400"}`}>
+          <div className="bg-base-200 p-2 md:p-4 rounded-lg text-center">
+            <p className="text-xs md:text-sm text-gray-500">💦 Riego</p>
+            <p
+              className={`text-lg md:text-2xl font-bold ${iotData.riego === "activo" ? "text-success" : "text-gray-400"}`}
+            >
               {iotData.riego === "activo" ? "🟢 Activo" : "⚪ Inactivo"}
             </p>
           </div>
@@ -388,15 +407,27 @@ export default function CryptoHuertaPage() {
             value={cantidadTokens}
             onChange={e => setCantidadTokens(e.target.value)}
           />
+          <p className="text-sm text-gray-500">
+            Precio actual:{" "}
+            {precioUsd !== null ? (
+              <span className="font-medium text-success">{formatUsd(precioUsd)} USDC por CHT</span>
+            ) : (
+              "..."
+            )}
+          </p>
           {ethVenta !== null && (
-            <p className="text-sm text-gray-500">
-              Recibirás ≈ {ethVenta.toFixed(6)} ETH (≈ {formatUsd(usdVenta)} USDC)
+            <p className="text-sm font-medium text-success">
+              Recibirás ≈ {formatUsd(usdVenta)} USDC{" "}
+              <span className="text-xs text-gray-500">({ethVenta.toFixed(6)} ETH)</span>
             </p>
           )}
           <button className="btn btn-secondary" onClick={handleVender} disabled={isVendiendo}>
             {isVendiendo ? "Procesando..." : "Vender tokens"}
           </button>
         </div>
+        <p className="text-xs text-gray-500 mt-2">
+          El pago se ejecuta en ETH de Arbitrum Sepolia, al equivalente en USDC del momento.
+        </p>
       </div>
 
       {/* IA */}

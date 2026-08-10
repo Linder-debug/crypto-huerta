@@ -4384,6 +4384,7 @@ __metadata:
     react: "npm:~19.2.5"
     react-dom: "npm:~19.2.5"
     react-hot-toast: "npm:~2.6.0"
+    react-icons: "npm:^5.7.0"
     tailwindcss: "npm:4.2.4"
     type-fest: "npm:~5.6.0"
     typescript: "npm:~5.8.2"
@@ -15461,6 +15462,15 @@ __metadata:
     react: ">=16"
     react-dom: ">=16"
   checksum: 10/825ebbaa03c63dc2f22795ac8d535b40f1066c3ace5b792d0de740070693f195b910c98f46a00f7f6195f804ecf41b03201f6ff6950a540098dd2b7a0069df5b
+  languageName: node
+  linkType: hard
+
+"react-icons@npm:^5.7.0":
+  version: 5.7.0
+  resolution: "react-icons@npm:5.7.0"
+  peerDependencies:
+    react: "*"
+  checksum: 10/db064cfe8e6456ba315d960debc50d3535ec794376c059bcdd79e20985d3c77d58a24c8cc567608695b10accd62b6c3c422821569b9c3c94d0811fe952c31e8c
   languageName: node
   linkType: hard
 

@@ -21,6 +21,10 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/",
   },
   {
+    label: "Inicio",
+    href: "/landing",
+  },
+  {
     label: "CryptoHuerta", // ← NUEVO
     href: "/crypto-huerta", // ← NUEVO
   },

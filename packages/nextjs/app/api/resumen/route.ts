@@ -1,6 +1,10 @@
 // packages/nextjs/app/api/resumen/route.ts
 import { NextResponse } from "next/server";
 
+// Forzar que esta ruta NUNCA se cacheé en Next.js
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 
 const loteData = {
@@ -12,7 +16,19 @@ const loteData = {
 };
 
 function construirPrompt() {
-  return `Genera un resumen ejecutivo breve (máximo 120 palabras) del estado semanal de un lote de arándanos premium en CryptoHuerta. Datos del lote: ubicación ${loteData.ubicacion}, cultivo ${loteData.cultivo}, tamaño ${loteData.lote}. Incluye: 1) estimación de producción de la semana, 2) un riesgo a vigilar (clima, plagas, riego), 3) una recomendación concreta. Tono profesional pero cercano, en español.`;
+  const timestamp = new Date().toISOString();
+  return `Genera un resumen ejecutivo breve (máximo 120 palabras) del estado semanal de un lote de arándanos premium en CryptoHuerta. 
+
+Datos del lote: ubicación ${loteData.ubicacion}, cultivo ${loteData.cultivo}, tamaño ${loteData.lote}.
+
+Fecha actual: ${timestamp}
+
+Incluye: 
+1) estimación de producción de la semana, 
+2) un riesgo a vigilar (clima, plagas, riego), 
+3) una recomendación concreta. 
+
+Tono profesional pero cercano, en español. Sé específico y variado en cada respuesta.`;
 }
 
 // Resumen simulado con datos reales del lote
@@ -52,7 +68,7 @@ function resumenSimulado(ultimoHash?: string): string {
   );
 }
 
-// Función para intentar la IA real usando openrouter/free
+// Función para intentar la IA real usando openrouter
 async function llamarOpenRouter(prompt: string): Promise<string | null> {
   try {
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -62,14 +78,18 @@ async function llamarOpenRouter(prompt: string): Promise<string | null> {
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "openrouter/free",
+        model: "openrouter/auto", // Auto selecciona el mejor modelo disponible
         messages: [{ role: "user", content: prompt }],
         max_tokens: 300,
+        temperature: 0.8, // Más variación en las respuestas
       }),
+      cache: "no-store", // Evitar cache del proxy
     });
 
     if (!response.ok) {
-      console.warn(`openrouter/free falló con status ${response.status}`);
+      console.warn(`OpenRouter falló con status ${response.status}`);
+      const errorText = await response.text();
+      console.warn("Error response:", errorText);
       return null;
     }
 
@@ -77,7 +97,7 @@ async function llamarOpenRouter(prompt: string): Promise<string | null> {
     const resumen = data.choices?.[0]?.message?.content;
     return resumen || null;
   } catch (error) {
-    console.warn("Error llamando a openrouter/free:", error);
+    console.warn("Error llamando a OpenRouter:", error);
     return null;
   }
 }
@@ -85,14 +105,14 @@ async function llamarOpenRouter(prompt: string): Promise<string | null> {
 export async function GET() {
   // Sin API key -> resumen simulado
   if (!OPENROUTER_API_KEY) {
-    return NextResponse.json({ resumen: resumenSimulado(), fuente: "simulado" });
+    return NextResponse.json({ resumen: resumenSimulado(), fuente: "simulado (sin API key)" });
   }
 
   const prompt = construirPrompt();
   const resumen = await llamarOpenRouter(prompt);
 
   if (resumen) {
-    return NextResponse.json({ resumen, fuente: "ia (openrouter/free)" });
+    return NextResponse.json({ resumen, fuente: "ia (openrouter)" });
   }
 
   // Si la IA falla, usamos el resumen simulado

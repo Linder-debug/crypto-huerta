@@ -27,7 +27,7 @@ export function useEthUsdPrice() {
             return;
           }
         }
-      } catch (e) {
+      } catch {
         // silencioso, intenta el respaldo
       }
       // 2) Binance (respaldo)
@@ -42,7 +42,7 @@ export function useEthUsdPrice() {
             return;
           }
         }
-      } catch (e) {
+      } catch {
         // silencioso
       }
       // 3) Fallback
