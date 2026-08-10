@@ -10,19 +10,18 @@
 
 ---
 
-## 📖 Tabla de contenido
+- [📌 Resumen del proyecto](#resumen-del-proyecto)
+- [🎯 Problema que resuelve](#problema-que-resuelve)
+- [🔧 Solución técnica](#solución-técnica)
+- [🏗️ Arquitectura del sistema](#arquitectura-del-sistema)
+- [🚀 Demo en vivo](#demo-en-vivo)
+- [📊 Modelo de negocio](#modelo-de-negocio)
+- [🛠️ Tecnologías utilizadas](#tecnologías-utilizadas)
+- [📦 Instalación y ejecución local](#instalación-y-ejecución-local)
+- [📜 Smart Contract](#smart-contract)
+- [👥 Equipo](#equipo)
+- [📄 Licencia](#licencia)
 
-- [📌 Resumen del proyecto](#-resumen-del-proyecto)
-- [🎯 Problema que resuelve](#-problema-que-resuelve)
-- [🔧 Solución técnica](#-solución-técnica)
-- [🏗️ Arquitectura del sistema](#️-arquitectura-del-sistema)
-- [🚀 Demo en vivo](#-demo-en-vivo)
-- [📊 Modelo de negocio](#-modelo-de-negocio)
-- [🛠️ Tecnologías utilizadas](#️-tecnologías-utilizadas)
-- [📦 Instalación y ejecución local](#-instalación-y-ejecución-local)
-- [📜 Smart Contract](#-smart-contract)
-- [👥 Equipo](#-equipo)
-- [📄 Licencia](#-licencia)
 
 ---
 
