@@ -6,14 +6,18 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: process.env.NEXT_PUBLIC_IGNORE_BUILD_ERROR === "true",
   },
-  // Causa raíz: @coinbase/cdp-sdk (dependencia transitiva del conector de
-  // Coinbase Wallet en RainbowKit) intenta importar opcionalmente los
-  // paquetes @x402/* (protocolo de pagos x402) que no están instalados y
-  // que este proyecto no usa. En build de producción, Next.js hace análisis
-  // estático completo y falla si no puede resolverlos, aunque esa rama de
-  // código nunca se ejecute. Esta función le dice a webpack: cualquier
-  // import que empiece con "@x402/" (cualquier subpath) se trata como
-  // módulo externo vacío en vez de intentar resolverlo en el bundle.
+  // ✅ Solución moderna: funciona tanto en Webpack como en Turbopack
+  // Le dice a Next.js que NO intente bundlear estos paquetes (son opcionales del SDK de Coinbase)
+  serverExternalPackages: [
+    "@x402/core",
+    "@x402/evm",
+    "@x402/svm",
+    "@x402/core/client",
+    "@x402/evm/exact/client",
+    "@x402/evm/upto/client",
+    "@x402/svm/exact/client",
+  ],
+  // Mantenemos el fallback para Webpack (por si alguien hace build local sin Turbopack)
   webpack: config => {
     config.externals = config.externals || [];
     config.externals.push(({ request }: { request?: string }, callback: any) => {
@@ -24,6 +28,8 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
+  // Turbopack config para ignorar warnings (opcional)
+  turbopack: {},
 };
 
 const isIpfs = process.env.NEXT_PUBLIC_IPFS_BUILD === "true";

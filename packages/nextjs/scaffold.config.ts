@@ -14,12 +14,11 @@ export type ScaffoldConfig = BaseConfig;
 export const DEFAULT_ALCHEMY_API_KEY = "IZYEU2cWBgnFmgiTAgpWD";
 
 const scaffoldConfig = {
-  targetNetworks: [chains.sepolia], // ✅ Mantener Sepolia
+  targetNetworks: [chains.arbitrumSepolia], // ✅ Arbitrum Sepolia
   pollingInterval: 3000,
   alchemyApiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY || DEFAULT_ALCHEMY_API_KEY,
   rpcOverrides: {
-    // ✅ Añadir RPC de PublicNode para evitar 429
-    [chains.sepolia.id]: "https://ethereum-sepolia-rpc.publicnode.com",
+    [chains.arbitrumSepolia.id]: "https://sepolia-rollup.arbitrum.io/rpc",
   },
   walletConnectProjectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || "3a8170812b534d0ff9d794f19a901d64",
   burnerWalletMode: "allNetworks",
