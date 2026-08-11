@@ -1,6 +1,21 @@
 "use client";
 
-// ---------- DATOS REALES CAMPAÑA 2025-26 (Fuente: Resultados Fundo Azul · Agroextiende) ----------
+// ===== DATA REAL CAMPAÑA 2025-26 (Fuente: Resultados Fundo Azul · Agroextiende) =====
+export const PRODUCCION_MENSUAL = [
+  { mes: "Jun", kg: 1020 },
+  { mes: "Jul", kg: 8348 },
+  { mes: "Ago", kg: 37678 },
+  { mes: "Set", kg: 48704 },
+  { mes: "Oct", kg: 36279 },
+  { mes: "Nov", kg: 96376 },
+  { mes: "Dic", kg: 134030 },
+  { mes: "Ene", kg: 150019 },
+  { mes: "Feb", kg: 99845 },
+  { mes: "Mar", kg: 51944 },
+];
+
+export const TOTAL_25_26 = 662579; // kg cosechados según informe
+
 const PRECIO_FOB = [
   { mes: "Ago", precio: 11.07 },
   { mes: "Set", precio: 10.85 },
@@ -12,11 +27,11 @@ const PRECIO_FOB = [
   { mes: "Mar", precio: 8.62 },
 ];
 
-// Pronóstico referencial: recuperación hacia ~US$10 (presentación Fundo Azul)
-const PRONOSTICO = [
-  { mes: "Abr", precio: 9.2 },
-  { mes: "May", precio: 9.6 },
-  { mes: "Jun", precio: 10.0 },
+// Proyección campaña ACTUAL 2026-27: recuperación hacia ~US$10 (presentación Fundo Azul)
+const PRONOSTICO_26_27 = [
+  { mes: "Ago 26", precio: 9.0 },
+  { mes: "Oct 26", precio: 9.6 },
+  { mes: "Dic 26", precio: 10.0 },
 ];
 
 const KILOS_DESTINO = [
@@ -26,46 +41,42 @@ const KILOS_DESTINO = [
   { destino: "Norteam.", kilos: 306510 },
 ];
 
-// Producción real mensual (kg) y programado proporcional = real × 1.2
-// (objetivo ~2.0 kg/planta vs rendimiento real 1.65 kg/planta, según informe)
-export const RENDIMIENTO = [
-  { mes: "Ago", programado: 45214, real: 37678 },
-  { mes: "Set", programado: 58445, real: 48704 },
-  { mes: "Oct", programado: 43535, real: 36279 },
-  { mes: "Nov", programado: 115651, real: 96376 },
-  { mes: "Dic", programado: 160836, real: 134030 },
-  { mes: "Ene", programado: 180023, real: 150019 },
-  { mes: "Feb", programado: 119814, real: 99845 },
-  { mes: "Mar", programado: 62333, real: 51944 },
-];
-
-/** Barras agrupadas: programado (violeta) vs real (verde) */
+/** KPIs reales + producción mensual real 25-26 */
 export function GraficoRendimiento() {
-  const max = Math.max(...RENDIMIENTO.map(d => Math.max(d.programado, d.real)));
+  const max = Math.max(...PRODUCCION_MENSUAL.map(d => d.kg));
   return (
     <div>
-      <div className="flex items-center gap-4 mb-3 text-xs">
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-violet-500 inline-block" /> Programado
-        </span>
-        <span className="flex items-center gap-1">
-          <span className="w-3 h-3 rounded bg-lime-500 inline-block" /> Real
-        </span>
+      {/* KPIs del informe */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-5">
+        <div className="bg-base-200 rounded-lg p-2 md:p-3 text-center">
+          <p className="text-[10px] md:text-xs text-gray-500">Real 25-26</p>
+          <p className="text-sm md:text-lg font-bold text-lime-500">816 kg/lote</p>
+        </div>
+        <div className="bg-base-200 rounded-lg p-2 md:p-3 text-center">
+          <p className="text-[10px] md:text-xs text-gray-500">Programado 26-27</p>
+          <p className="text-sm md:text-lg font-bold text-violet-500">1,960 kg/lote</p>
+        </div>
+        <div className="bg-base-200 rounded-lg p-2 md:p-3 text-center">
+          <p className="text-[10px] md:text-xs text-gray-500">Cosechado 25-26</p>
+          <p className="text-sm md:text-lg font-bold">662,579 kg</p>
+        </div>
+        <div className="bg-base-200 rounded-lg p-2 md:p-3 text-center">
+          <p className="text-[10px] md:text-xs text-gray-500">Rendimiento</p>
+          <p className="text-sm md:text-lg font-bold">1.65 kg/planta</p>
+        </div>
       </div>
-      <div className="flex items-end gap-1 sm:gap-4 h-40">
-        {RENDIMIENTO.map(d => (
+
+      {/* Producción mensual real */}
+      <p className="text-sm font-medium mb-2">Producción mensual real · Campaña 2025-26 (kg)</p>
+      <div className="flex items-end gap-1 sm:gap-2 h-36">
+        {PRODUCCION_MENSUAL.map(d => (
           <div key={d.mes} className="flex-1 flex flex-col items-center justify-end h-full">
             <div
-              className="flex items-end gap-0.5 sm:gap-1 w-full justify-center h-full"
-              title={`${d.mes}: programado ${d.programado.toLocaleString("en-US")} kg / real ${d.real.toLocaleString("en-US")} kg`}
-            >
-              <div
-                className="w-2 sm:w-5 bg-violet-500 rounded-t"
-                style={{ height: `${(d.programado / max) * 100}%` }}
-              />
-              <div className="w-2 sm:w-5 bg-lime-500 rounded-t" style={{ height: `${(d.real / max) * 100}%` }} />
-            </div>
-            <span className="text-[10px] text-gray-400 mt-1">{d.mes}</span>
+              className="w-full max-w-[34px] bg-lime-500 rounded-t"
+              style={{ height: `${(d.kg / max) * 100}%` }}
+              title={`${d.mes}: ${d.kg.toLocaleString("en-US")} kg`}
+            />
+            <span className="text-[9px] text-gray-400 mt-1">{d.mes}</span>
           </div>
         ))}
       </div>
@@ -73,12 +84,12 @@ export function GraficoRendimiento() {
   );
 }
 
-/** Línea verde: precio FOB real · línea gris punteada: pronóstico referencial */
+/** Línea verde: precio FOB real 25-26 · punteada gris: proyección campaña actual 26-27 */
 export function GraficoPrecioFOB() {
-  const todos = [...PRECIO_FOB, ...PRONOSTICO];
+  const todos = [...PRECIO_FOB, ...PRONOSTICO_26_27];
   const max = 12;
   const min = 4;
-  const W = 340;
+  const W = 360;
   const H = 150;
   const padX = 16;
   const padTop = 16;
@@ -87,7 +98,7 @@ export function GraficoPrecioFOB() {
   const y = (p: number) => padTop + (1 - (p - min) / (max - min)) * (H - padTop - padBottom);
 
   const lineaReal = PRECIO_FOB.map((d, i) => `${x(i)},${y(d.precio)}`).join(" ");
-  const lineaPron = [PRECIO_FOB[PRECIO_FOB.length - 1], ...PRONOSTICO]
+  const lineaPron = [PRECIO_FOB[PRECIO_FOB.length - 1], ...PRONOSTICO_26_27]
     .map((d, i) => `${x(PRECIO_FOB.length - 1 + i)},${y(d.precio)}`)
     .join(" ");
 
@@ -101,7 +112,7 @@ export function GraficoPrecioFOB() {
           <text x={x(i)} y={y(d.precio) - 5} textAnchor="middle" fontSize="7" fill="#9ca3af">
             {d.precio.toFixed(2)}
           </text>
-          <text x={x(i)} y={H - 8} textAnchor="middle" fontSize="7" fill="#9ca3af">
+          <text x={x(i)} y={H - 8} textAnchor="middle" fontSize="6.5" fill="#9ca3af">
             {d.mes}
           </text>
         </g>

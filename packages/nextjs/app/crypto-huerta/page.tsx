@@ -8,7 +8,8 @@ import {
   GraficoKilosDestino,
   GraficoPrecioFOB,
   GraficoRendimiento,
-  RENDIMIENTO,
+  PRODUCCION_MENSUAL,
+  TOTAL_25_26,
 } from "~~/components/GraficosFundoAzul";
 import { useScaffoldReadContract, useScaffoldWriteContract, useTargetNetwork } from "~~/hooks/scaffold-eth";
 import { formatUsd, useEthUsdPrice } from "~~/hooks/useEthUsdPrice";
@@ -302,10 +303,11 @@ export default function CryptoHuertaPage() {
       {/* Gráfico de rendimiento */}
       {/* Rendimiento del lote */}
 
+      {/* Rendimiento de campañas */}
       <div className="bg-base-100 shadow-xl rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-2">📊 Rendimiento del lote: programado vs real</h2>
+        <h2 className="text-xl font-semibold mb-2">📊 Rendimiento: real 25-26 vs programado 26-27</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Kilogramos por mes de la campaña 2025-26: cosecha real vs proyección proporcional.
+          Producción real de la campaña cerrada y meta oficial por lote de la campaña actual (hoy, ago 2026).
         </p>
         <GraficoRendimiento />
         <button className="btn btn-ghost btn-sm mt-4" onClick={() => setMostrarTabla(v => !v)}>
@@ -317,18 +319,16 @@ export default function CryptoHuertaPage() {
               <thead>
                 <tr>
                   <th>Mes</th>
-                  <th>Programado (kg)</th>
-                  <th>Real (kg)</th>
-                  <th>Cumplimiento</th>
+                  <th>Producción real (kg)</th>
+                  <th>% de la campaña</th>
                 </tr>
               </thead>
               <tbody>
-                {RENDIMIENTO.map(d => (
+                {PRODUCCION_MENSUAL.map(d => (
                   <tr key={d.mes}>
                     <td>{d.mes}</td>
-                    <td>{d.programado.toLocaleString("en-US")}</td>
-                    <td>{d.real.toLocaleString("en-US")}</td>
-                    <td className="text-warning">{Math.round((d.real / d.programado) * 100)}%</td>
+                    <td>{d.kg.toLocaleString("en-US")}</td>
+                    <td>{((d.kg / TOTAL_25_26) * 100).toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -336,8 +336,7 @@ export default function CryptoHuertaPage() {
           </div>
         )}
         <div className="mt-2 text-xs text-gray-500">
-          * Real: cosecha campaña 2025-26 (Fundo Azul). Programado: estimación proporcional (×1.2, objetivo ~2.0
-          kg/planta).
+          Fuente: Resultados integrales campaña 2025-26 y proyección 2026-27 · Fundo Azul (Agroextiende).
         </div>
       </div>
 
@@ -355,7 +354,7 @@ export default function CryptoHuertaPage() {
               <span className="w-3 h-1.5 bg-lime-400 inline-block rounded" /> Real campaña 25-26
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-1.5 bg-gray-400 inline-block rounded" /> Pronóstico referencial
+              <span className="w-3 h-1.5 bg-gray-400 inline-block rounded" /> Proyección campaña 26-27 (hacia ~US$10)
             </span>
           </div>
         </div>
