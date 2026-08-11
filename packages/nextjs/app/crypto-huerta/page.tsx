@@ -240,7 +240,7 @@ export default function CryptoHuertaPage() {
               {precioUsd !== null ? (
                 <>
                   <span className="font-bold text-success">{formatUsd(precioUsd)} USDC</span>{" "}
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-base-content/60">
                     ({precio !== undefined ? formatEther(precio) : "..."} ETH)
                   </span>
                 </>
@@ -248,9 +248,10 @@ export default function CryptoHuertaPage() {
                 "..."
               )}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Tipo de cambio ETH/USD: {ethUsd ? formatUsd(ethUsd) : "cargando..."}
-              {ethUsd && !isLive && " (referencial, sin conexión a APIs)"}
+            <p className="text-xs text-base-content/60 mt-1">
+              <span className="font-medium">Tipo de cambio ETH/USD:</span>{" "}
+              {ethUsd ? <span className="font-semibold">{formatUsd(ethUsd)}</span> : "cargando..."}
+              {ethUsd && !isLive && " (referencial)"}
             </p>
           </div>
           {/* Imagen al costado solo en laptop */}

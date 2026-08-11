@@ -75,32 +75,37 @@ function parsearJson(texto: string): Omit<NoticiasData, "fuente"> | null {
   }
 }
 
+const MODELOS = ["openrouter/free", "openrouter/auto"];
+
 async function llamarOpenRouter(prompt: string): Promise<string | null> {
-  try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "openrouter/auto",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 500,
-        temperature: 0.8,
-      }),
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      console.warn(`OpenRouter noticias falló con status ${response.status}`);
-      return null;
+  for (const modelo of MODELOS) {
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: modelo,
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 500,
+          temperature: 0.8,
+        }),
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        console.warn(`OpenRouter (${modelo}) falló con status ${response.status}`);
+        continue;
+      }
+      const data = await response.json();
+      const contenido = data.choices?.[0]?.message?.content;
+      if (contenido) return contenido;
+    } catch (error) {
+      console.warn(`Error llamando a OpenRouter (${modelo}):`, error);
     }
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content ?? null;
-  } catch (error) {
-    console.warn("Error llamando a OpenRouter (noticias):", error);
-    return null;
   }
+  return null;
 }
 
 export async function GET() {

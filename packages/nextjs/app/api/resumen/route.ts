@@ -69,37 +69,38 @@ function resumenSimulado(ultimoHash?: string): string {
 }
 
 // Función para intentar la IA real usando openrouter
+
+const MODELOS = ["openrouter/free", "openrouter/auto"];
+
 async function llamarOpenRouter(prompt: string): Promise<string | null> {
-  try {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "openrouter/auto", // Auto selecciona el mejor modelo disponible
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 300,
-        temperature: 0.8, // Más variación en las respuestas
-      }),
-      cache: "no-store", // Evitar cache del proxy
-    });
-
-    if (!response.ok) {
-      console.warn(`OpenRouter falló con status ${response.status}`);
-      const errorText = await response.text();
-      console.warn("Error response:", errorText);
-      return null;
+  for (const modelo of MODELOS) {
+    try {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: modelo,
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 500,
+          temperature: 0.8,
+        }),
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        console.warn(`OpenRouter (${modelo}) falló con status ${response.status}`);
+        continue;
+      }
+      const data = await response.json();
+      const contenido = data.choices?.[0]?.message?.content;
+      if (contenido) return contenido;
+    } catch (error) {
+      console.warn(`Error llamando a OpenRouter (${modelo}):`, error);
     }
-
-    const data = await response.json();
-    const resumen = data.choices?.[0]?.message?.content;
-    return resumen || null;
-  } catch (error) {
-    console.warn("Error llamando a OpenRouter:", error);
-    return null;
   }
+  return null;
 }
 
 export async function GET() {
